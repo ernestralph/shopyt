@@ -1,8 +1,11 @@
 import React, {useState} from 'react'
 import styles from "./Header.module.scss"
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {FaShoppingCart, FaTimes} from 'react-icons/fa'
 import {HiOutlineMenuAlt3} from 'react-icons/hi'
+import { useDispatch } from 'react-redux'
+import { ResetAuth, logout } from '../../redux/features/auth/authSlice'
+import ShowOnLogin, { ShowOnLogOut } from '../hiddenLink/hiddenLink'
 
 export const logo = (
 <div className={styles.logo}>
@@ -20,6 +23,9 @@ const Header = () => {
  const [showMenu, setShowMenu] = useState(false);
  const [scrollPage, setScrollPage] = useState(false);
 
+ const dispatch = useDispatch();
+ const navigate = useNavigate();
+
  const fixNavbar = ()=>{
   if(window.scrollY > 50){
     setScrollPage(true);
@@ -36,6 +42,12 @@ const Header = () => {
  const hideMenu =()=>{
   setShowMenu(false)
  }
+ const logoutUser = async ()=>{
+  await dispatch(logout());
+  await dispatch(ResetAuth());
+  navigate('/login');
+ }
+
  const cart =(
   <span className={styles.cart}>
   <Link to={"/cart"}>
@@ -66,11 +78,20 @@ const Header = () => {
 
          <div className={styles['header-right']}>
           <span className={styles.links}>
-           <NavLink to='/login' className={activeLink}>login</NavLink>
-           <NavLink to='/register' className={activeLink}>register</NavLink>
-           <NavLink to='/order-history' className={activeLink}>my order</NavLink>
+            <ShowOnLogOut>
+              <NavLink to='/login' className={activeLink}>login</NavLink>
+            </ShowOnLogOut>
+            <ShowOnLogOut>
+              <NavLink to='/register' className={activeLink}>register</NavLink>
+            </ShowOnLogOut>
+            <ShowOnLogin>
+              <NavLink to='/order-history' className={activeLink}>my order</NavLink>
+            </ShowOnLogin>
+            <ShowOnLogin>
+              <Link to='/' onClick={logoutUser}>Logout</Link>
+            </ShowOnLogin>
           </span>
-         {cart}
+          {cart}
          </div>
         </nav>
         <div className={styles['menu-icon']}>
