@@ -27,7 +27,7 @@ export const register = createAsyncThunk(
     return thunkApi.rejectWithValue(message);
   }
  }
-)
+);
 // login user
 export const login = createAsyncThunk(
  'auth/login',
@@ -44,7 +44,7 @@ export const login = createAsyncThunk(
     return thunkApi.rejectWithValue(message);
   }
  }
-)
+);
 
 // logout user
 export const logout = createAsyncThunk(
@@ -62,7 +62,7 @@ export const logout = createAsyncThunk(
     return thunkApi.rejectWithValue(message);
   }
  }
-)
+);
 
 // get login status
 export const getLoginStatus = createAsyncThunk(
@@ -80,7 +80,58 @@ export const getLoginStatus = createAsyncThunk(
     return thunkApi.rejectWithValue(message);
   }
  }
-)
+);
+// get User
+export const getUser = createAsyncThunk(
+ 'auth/getUser',
+ async (_, thunkApi) =>{
+  try {
+   return await authService.getUser();
+  }catch(error){
+   const message = (
+    error.response &&
+    error.response.data &&
+    error.response.data.message) ||
+    error.message ||
+    error.toString();
+    return thunkApi.rejectWithValue(message);
+  }
+ }
+);
+// updateUser
+export const updateUser = createAsyncThunk(
+ 'auth/updateUser',
+ async (userData, thunkApi) =>{
+  try {
+   return await authService.updateUser(userData);
+  }catch(error){
+   const message = (
+    error.response &&
+    error.response.data &&
+    error.response.data.message) ||
+    error.message ||
+    error.toString();
+    return thunkApi.rejectWithValue(message);
+  }
+ }
+);
+// updateUserPhoto
+export const updatePhoto = createAsyncThunk(
+ 'auth/updatePhoto',
+ async (userData, thunkApi) =>{
+  try {
+   return await authService.updatePhoto(userData);
+  }catch(error){
+   const message = (
+    error.response &&
+    error.response.data &&
+    error.response.data.message) ||
+    error.message ||
+    error.toString();
+    return thunkApi.rejectWithValue(message);
+  }
+ }
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -91,6 +142,9 @@ const authSlice = createSlice({
     state.isSuccess = false;
     state.isLoading = false;
     state.message = '';
+   },
+   SetIsLoading(state){
+    state.isLoading = true;
    }
   },
   extraReducers:(builder) => {
@@ -123,6 +177,12 @@ const authSlice = createSlice({
     state.isLoggedIn = true;
     state.user = action.payload;
     toast.success("LogIn Successfully");
+   })
+   .addCase(login.rejected, (state, action)=>{
+    state.isLoading = false;
+    state.isError = true;
+    state.message = action.payload;
+    toast.error(action.payload)
    })
    // logout user
    .addCase(logout.pending, (state)=>{
@@ -158,9 +218,59 @@ const authSlice = createSlice({
     state.isError = true;
     state.message = action.payload;
    })
+   // getUser
+   .addCase(getUser.pending, (state)=>{
+    state.isLoading = true;
+   })
+   .addCase(getUser.fulfilled, (state, action)=>{
+    state.isLoading = false;
+    state.isSuccess = true;
+    state.isLoggedIn = true;
+    state.user = action.payload
+   })
+   .addCase(getUser.rejected, (state, action)=>{
+    state.isLoading = false;
+    state.isError = true;
+    state.message = action.payload;
+    toast.error(action.payload)
+   })
+   // updateUser 
+   .addCase(updateUser.pending, (state)=>{
+    state.isLoading = true;
+   })
+   .addCase(updateUser.fulfilled, (state, action)=>{
+    state.isLoading = false;
+    state.isSuccess = true;
+    state.isLoggedIn = true;
+    state.user = action.payload;
+    toast.success("User updated");
+   })
+   .addCase(updateUser.rejected, (state, action)=>{
+    state.isLoading = false;
+    state.isError = true;
+    state.message = action.payload;
+    toast.error(action.payload)
+   })
+   // updatePhoto
+   .addCase(updatePhoto.pending, (state)=>{
+    state.isLoading = true;
+   })
+   .addCase(updatePhoto.fulfilled, (state, action)=>{
+    state.isLoading = false;
+    state.isSuccess = true;
+    state.isLoggedIn = true;
+    state.user = action.payload;
+    toast.success("User photo updated");
+   })
+   .addCase(updatePhoto.rejected, (state, action)=>{
+    state.isLoading = false;
+    state.isError = true;
+    state.message = action.payload;
+    toast.error(action.payload)
+   })
   }
 });
 
-export const {ResetAuth} = authSlice.actions
+export const {ResetAuth, SetIsLoading} = authSlice.actions
 
 export default authSlice.reducer
